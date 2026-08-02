@@ -170,66 +170,16 @@ async def back_to_menu(call: CallbackQuery, state: FSMContext):
     await call.message.edit_text(MAIN_TEXT, reply_markup=main_menu_kb())
 
 # ================= Анкета =================
+APPLY_TEXT = """😌 Надеемся вы ознакомились с информацией, предлагаем пройти следующий этап и заполнить краткую анкету о себе:
+
+Нажимайте на ссылку и переходите в чат, текст будет почти готов ⬇️
+
+https://t.me/m/y39KU-zkNGJh"""
+
 @router.callback_query(F.data == "apply")
 async def start_application(call: CallbackQuery, state: FSMContext):
-    await state.set_state(Form.name)
-    await call.message.edit_text("Как вас зовут? Напишите имя (или ник):")
-
-@router.message(Form.name)
-async def get_name(message: Message, state: FSMContext):
-    await state.update_data(name=message.text)
-    await state.set_state(Form.contact)
-    await message.answer("Оставьте контакт для связи (ваш @username в Telegram или номер телефона):")
-
-@router.message(Form.contact)
-async def get_contact(message: Message, state: FSMContext):
-    await state.update_data(contact=message.text)
-    await state.set_state(Form.experience)
-    await message.answer("Есть ли опыт в трафике/баинге? Если да — кратко опишите:")
-
-@router.message(Form.experience)
-async def get_experience(message: Message, state: FSMContext):
-    await state.update_data(experience=message.text)
-    await state.set_state(Form.sources)
-    await message.answer("С какими источниками готовы работать? (TikTok, Instagram, Threads, X, YouTube, Reddit — можно несколько):")
-
-@router.message(Form.sources)
-async def get_sources(message: Message, state: FSMContext):
-    data = await state.update_data(sources=message.text)
-    user_id = message.from_user.id
-
-    async with aiosqlite.connect(DB_PATH) as db:
-        cur = await db.execute("SELECT source_deeplink_id FROM users WHERE telegram_id=?", (user_id,))
-        row = await cur.fetchone()
-        deeplink_id = row[0] if row else None
-
-        await db.execute(
-            """INSERT INTO applications 
-               (user_id, deeplink_id, full_name, phone, age, city, comment) 
-               VALUES (?,?,?,?,?,?,?)""",
-            (user_id, deeplink_id, data['name'], data['contact'], None, None, 
-             f"Опыт: {data['experience']}\nИсточники: {data['sources']}")
-        )
-        await db.commit()
-
     await state.clear()
-    await message.answer(
-        "Спасибо! Заявка принята ✅\nМы свяжемся с вами в ближайшее время.",
-        reply_markup=main_menu_kb()
-    )
-
-    bot: Bot = message.bot
-    for admin_id in ADMIN_IDS:
-        await bot.send_message(
-            admin_id,
-            f"🆕 <b>Новая заявка</b>\n\n"
-            f"Имя: {data['name']}\n"
-            f"Контакт: {data['contact']}\n"
-            f"Опыт: {data['experience']}\n"
-            f"Источники: {data['sources']}\n"
-            f"User ID: <code>{user_id}</code>\n"
-            f"Username: @{message.from_user.username or '-'}"
-        )
+    await call.message.edit_text(APPLY_TEXT, reply_markup=sub_page_kb())
 
 # ================= АДМИНКА =================
 @router.message(Command("newlink"))
