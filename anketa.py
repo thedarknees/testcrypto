@@ -116,6 +116,11 @@ def sub_page_kb() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_menu")],
     ])
 
+def back_only_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_menu")],
+    ])
+
 # ================= FSM для анкеты =================
 class Form(StatesGroup):
     name = State()
@@ -181,7 +186,7 @@ https://t.me/m/y39KU-zkNGJh"""
 @router.callback_query(F.data == "apply")
 async def start_application(call: CallbackQuery, state: FSMContext):
     await state.clear()
-    await call.message.edit_text(APPLY_TEXT, reply_markup=sub_page_kb())
+    await call.message.edit_text(APPLY_TEXT, reply_markup=back_only_kb())
 
 # ================= АДМИНКА =================
 @router.message(Command("newlink"))
