@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import Command, CommandStart
@@ -11,7 +12,8 @@ import aiosqlite
 
 BOT_TOKEN = "8670653301:AAGr4E132PTO3pU0ZAKD86Tmu9lb92XYQpg"
 ADMIN_IDS = [1035443294]
-DB_PATH = "bot.db"
+DB_PATH = "/app/data/bot.db"
+SCHEMA_PATH = "/app/data/schema.sql"
 
 router = Router()
 
@@ -308,8 +310,9 @@ async def list_links(message: Message):
 
 # ================= Инициализация БД =================
 async def init_db():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     async with aiosqlite.connect(DB_PATH) as db:
-        with open("schema.sql", "r", encoding="utf-8") as f:
+        with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
             await db.executescript(f.read())
         await db.commit()
 
