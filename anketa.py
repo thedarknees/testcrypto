@@ -103,10 +103,7 @@ FAQ_TEXT = """❗️ <b>FAQ. Частые вопросы:</b>
 
 def main_menu_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="🧢 О позиции", callback_data="about"),
-            InlineKeyboardButton(text="💰 Условия", callback_data="conditions"),
-        ],
+        [InlineKeyboardButton(text="🧢 О позиции", callback_data="about")],
         [InlineKeyboardButton(text="❓ FAQ", callback_data="faq")],
         [InlineKeyboardButton(text="📝 Оставить заявку", callback_data="apply")],
     ])
@@ -162,10 +159,6 @@ async def cmd_start(message: Message, state: FSMContext):
 @router.callback_query(F.data == "about")
 async def show_about(call: CallbackQuery):
     await call.message.edit_text(ABOUT_TEXT, reply_markup=sub_page_kb())
-
-@router.callback_query(F.data == "conditions")
-async def show_conditions(call: CallbackQuery):
-    await call.message.edit_text(CONDITIONS_TEXT, reply_markup=sub_page_kb())
 
 @router.callback_query(F.data == "faq")
 async def show_faq(call: CallbackQuery):
